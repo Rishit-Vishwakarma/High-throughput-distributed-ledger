@@ -2,15 +2,12 @@ package com.rishit.ledger.Service;
 
 import com.rishit.ledger.Entity.User;
 import com.rishit.ledger.Entity.Wallet;
-import com.rishit.ledger.Enum.LedgerEntryType;
 import com.rishit.ledger.Enum.WalletStatus;
 import com.rishit.ledger.Repository.UserRepository;
 import com.rishit.ledger.Repository.WalletRepository;
-import jakarta.validation.constraints.NotNull;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 
 @Service
 public class WalletService {
