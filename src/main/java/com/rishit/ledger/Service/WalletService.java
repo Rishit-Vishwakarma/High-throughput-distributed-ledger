@@ -1,8 +1,11 @@
 package com.rishit.ledger.Service;
 
+import com.rishit.ledger.DTO.Request.CreateWalletRequest;
+import com.rishit.ledger.DTO.Response.WalletResponse;
 import com.rishit.ledger.Entity.User;
 import com.rishit.ledger.Entity.Wallet;
 import com.rishit.ledger.Enum.WalletStatus;
+import com.rishit.ledger.Mapper.WalletMapper;
 import com.rishit.ledger.Repository.UserRepository;
 import com.rishit.ledger.Repository.WalletRepository;
 import org.springframework.stereotype.Service;
@@ -14,14 +17,12 @@ public class WalletService {
 
     private final UserRepository userRepository;
     private final WalletRepository walletRepository;
-    private final Wallet wallet;
-    private final User user;
+    private final WalletMapper walletMapper;
 
-    public WalletService(WalletRepository walletRepository, UserRepository userRepository, Wallet wallet, User user){
+    public WalletService(WalletRepository walletRepository, UserRepository userRepository, WalletMapper walletMapper){
         this.walletRepository = walletRepository;
         this.userRepository = userRepository;
-        this.wallet = wallet;
-        this.user = user;
+        this.walletMapper = walletMapper;
     }
 
     public Wallet getWalletById(Long walletId){
@@ -29,8 +30,10 @@ public class WalletService {
                 .orElseThrow(() -> new RuntimeException("No wallet found for this Id."));
     }
 
-    public Wallet createWallet(Long userId, String currency){
+    public WalletResponse createWallet(CreateWalletRequest createWalletRequest){
 
+        Long userId = createWalletRequest.getUserId();
+        String currency = createWalletRequest.getCurrency();
         User user1 = userRepository.findById(userId).orElseThrow(()->new RuntimeException("User not found."));
         Boolean isWalletExist = walletRepository.existsByUser_UserId(userId);
         if(isWalletExist == true){
@@ -42,8 +45,10 @@ public class WalletService {
         wallet1.setStatus(WalletStatus.ACTIVE);
         wallet1.setCurrency(currency);
 
-        return walletRepository.save(wallet1);
+        Wallet wallet = walletRepository.save(wallet1);
 
+        WalletResponse walletResponse = walletMapper.walletResponse(wallet);
+        return walletResponse;
     }
 
     public String deposit(Long walletId, BigDecimal amount){
