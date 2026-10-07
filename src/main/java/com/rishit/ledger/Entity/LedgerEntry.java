@@ -19,10 +19,15 @@ public class LedgerEntry {
 
     @NotNull
     @Column(nullable = false, precision = 19, scale = 4)
-    private BigDecimal amount = BigDecimal.ZERO;
+    private BigDecimal debit = BigDecimal.ZERO;
+
+    @NotNull
+    @Column(nullable = false, precision = 19, scale = 4)
+    private BigDecimal credit = BigDecimal.ZERO;
 
     @Enumerated(EnumType.STRING)
     @NotNull
+    @Column(nullable = false)
     private LedgerEntryType ledgerEntryType;
 
     @NotNull
@@ -39,6 +44,6 @@ public class LedgerEntry {
     private Transaction transaction;
 
     @ManyToOne
-    @JoinColumn(name = "wallet_id")
+    @JoinColumn(name = "wallet_id", nullable = false)
     private Wallet wallet;
 }

@@ -1,39 +1,52 @@
 package com.rishit.ledger.Service;
 
+import com.rishit.ledger.DTO.Request.CreateWalletRequest;
+import com.rishit.ledger.DTO.Response.WalletResponse;
 import com.rishit.ledger.Entity.User;
 import com.rishit.ledger.Entity.Wallet;
-import com.rishit.ledger.Enum.LedgerEntryType;
 import com.rishit.ledger.Enum.WalletStatus;
+import com.rishit.ledger.Exception.WalletNotFoundException;
+import com.rishit.ledger.Mapper.WalletMapper;
 import com.rishit.ledger.Repository.UserRepository;
 import com.rishit.ledger.Repository.WalletRepository;
-import jakarta.validation.constraints.NotNull;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 
 @Service
 public class WalletService {
 
     private final UserRepository userRepository;
     private final WalletRepository walletRepository;
-    private final Wallet wallet;
-    private final User user;
+    private final WalletMapper walletMapper;
 
-    public WalletService(WalletRepository walletRepository, UserRepository userRepository, Wallet wallet, User user){
+    public WalletService(WalletRepository walletRepository, UserRepository userRepository, WalletMapper walletMapper){
         this.walletRepository = walletRepository;
         this.userRepository = userRepository;
-        this.wallet = wallet;
-        this.user = user;
+        this.walletMapper = walletMapper;
     }
 
-    public Wallet getWalletById(Long walletId){
-        return walletRepository.findById(walletId)
-                .orElseThrow(() -> new RuntimeException("No wallet found for this Id."));
+///Method to get wallet by user_id.
+    public WalletResponse getWalletByUserId(Long userId){
+        Wallet wallet = walletRepository.findByUser_UserId(userId).orElseThrow(() -> new WalletNotFoundException("No wallet found for this user. First create one."));
+        return walletMapper.walletResponse(wallet);
     }
 
-    public Wallet createWallet(Long userId, String currency){
 
+/// Method to get wallet by wallet_id.
+    public WalletResponse getWalletById(Long walletId){
+        Wallet wallet =  walletRepository.findById(walletId)
+                .orElseThrow(() -> new WalletNotFoundException("No wallet found for this Id."));
+
+        return walletMapper.walletResponse(wallet);
+    }
+
+
+///Method to create wallet.
+    public WalletResponse createWallet(CreateWalletRequest createWalletRequest){
+
+        Long userId = createWalletRequest.getUserId();
+        String currency = createWalletRequest.getCurrency();
         User user1 = userRepository.findById(userId).orElseThrow(()->new RuntimeException("User not found."));
         Boolean isWalletExist = walletRepository.existsByUser_UserId(userId);
         if(isWalletExist == true){
@@ -45,10 +58,14 @@ public class WalletService {
         wallet1.setStatus(WalletStatus.ACTIVE);
         wallet1.setCurrency(currency);
 
-        return walletRepository.save(wallet1);
+        Wallet wallet = walletRepository.save(wallet1);
 
+        WalletResponse walletResponse = walletMapper.walletResponse(wallet);
+        return walletResponse;
     }
 
+
+///method to deposit money in wallet (Not being used in any class).
     public String deposit(Long walletId, BigDecimal amount){
         Wallet wallet1 = walletRepository.findById(walletId).orElseThrow(() -> new RuntimeException("Wallet for this user do not exist, Please first create a wallet."));
         Boolean isActive = wallet1.getStatus().equals(WalletStatus.ACTIVE);

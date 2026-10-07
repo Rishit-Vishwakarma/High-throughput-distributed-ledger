@@ -16,11 +16,15 @@ public class Transaction {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long transactionId;
+    private Long transactionId;
 
     @NotNull
     @Column(nullable = false, precision = 19, scale = 4)
     private BigDecimal amount = BigDecimal.ZERO;
+
+    @NotNull
+    @Column(nullable = false)
+    private String currency;
 
     @NotNull
     @Column(nullable = false)
