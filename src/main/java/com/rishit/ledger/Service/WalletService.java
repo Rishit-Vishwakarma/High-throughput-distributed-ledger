@@ -5,6 +5,7 @@ import com.rishit.ledger.DTO.Response.WalletResponse;
 import com.rishit.ledger.Entity.User;
 import com.rishit.ledger.Entity.Wallet;
 import com.rishit.ledger.Enum.WalletStatus;
+import com.rishit.ledger.Exception.WalletNotFoundException;
 import com.rishit.ledger.Mapper.WalletMapper;
 import com.rishit.ledger.Repository.UserRepository;
 import com.rishit.ledger.Repository.WalletRepository;
@@ -25,11 +26,23 @@ public class WalletService {
         this.walletMapper = walletMapper;
     }
 
-    public Wallet getWalletById(Long walletId){
-        return walletRepository.findById(walletId)
-                .orElseThrow(() -> new RuntimeException("No wallet found for this Id."));
+///Method to get wallet by user_id.
+    public WalletResponse getWalletByUserId(Long userId){
+        Wallet wallet = walletRepository.findByUser_UserId(userId).orElseThrow(() -> new WalletNotFoundException("No wallet found for this user. First create one."));
+        return walletMapper.walletResponse(wallet);
     }
 
+
+/// Method to get wallet by wallet_id.
+    public WalletResponse getWalletById(Long walletId){
+        Wallet wallet =  walletRepository.findById(walletId)
+                .orElseThrow(() -> new WalletNotFoundException("No wallet found for this Id."));
+
+        return walletMapper.walletResponse(wallet);
+    }
+
+
+///Method to create wallet.
     public WalletResponse createWallet(CreateWalletRequest createWalletRequest){
 
         Long userId = createWalletRequest.getUserId();
@@ -51,6 +64,8 @@ public class WalletService {
         return walletResponse;
     }
 
+
+///method to deposit money in wallet (Not being used in any class).
     public String deposit(Long walletId, BigDecimal amount){
         Wallet wallet1 = walletRepository.findById(walletId).orElseThrow(() -> new RuntimeException("Wallet for this user do not exist, Please first create a wallet."));
         Boolean isActive = wallet1.getStatus().equals(WalletStatus.ACTIVE);
